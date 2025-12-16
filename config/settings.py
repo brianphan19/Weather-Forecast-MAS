@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-@dataclass
+@dataclass(frozen=True)
 class Config:
     # Weather API Keys
     openweather_api_key: str
