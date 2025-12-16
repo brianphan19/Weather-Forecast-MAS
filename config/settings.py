@@ -24,6 +24,7 @@ class Config:
     temp_alert_low: float
     wind_alert: float
     precip_alert: float
+    temp_unit:str
 
     # Default Location
     default_location: str
@@ -58,6 +59,7 @@ class Config:
             temp_alert_low=float(os.getenv("TEMP_ALERT_THRESHOLD_LOW", 0)),
             wind_alert=float(os.getenv("WIND_ALERT_THRESHOLD", 50)),
             precip_alert=float(os.getenv("PRECIPITATION_ALERT_THRESHOLD", 2.0)),
+            temp_unit=os.getenv("TEMP_UNITS",'imperial'),
 
             # Default location
             default_location=os.getenv("DEFAULT_LOCATION", "New York, NY, USA")
