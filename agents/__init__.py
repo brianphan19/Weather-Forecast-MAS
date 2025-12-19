@@ -1,1 +1,1 @@
-from .data_acquisition import DataAcquisitonAgent
+from .data_acquisition import DataCollectorAgent
