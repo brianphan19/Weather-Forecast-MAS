@@ -73,8 +73,7 @@ class WeatherConfig:
     openweather_api_key: str
     weatherapi_key: str
     visual_crossing_api_key: str
-    accuweather_api_key: str
-    noaa_user_agent: str
+
 
     # Alert Thresholds
     temp_alert_high: float
@@ -98,8 +97,7 @@ class WeatherConfig:
             openweather_api_key=openweather_api_key,
             weatherapi_key=os.getenv("WEATHERAPI_KEY", "").strip(),
             visual_crossing_api_key=os.getenv("VISUAL_CROSSING_API_KEY", "").strip(),
-            accuweather_api_key=os.getenv("ACCUWEATHER_API_KEY", "").strip(),
-            noaa_user_agent=os.getenv("NOAA_USER_AGENT", "").strip(),
+
 
             # Alerts
             temp_alert_high=float(os.getenv("TEMP_ALERT_THRESHOLD_HIGH", 100)),

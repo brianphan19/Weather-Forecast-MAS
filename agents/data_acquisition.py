@@ -101,6 +101,7 @@ class DataCollectorAgent:
             AgentState: Updated state containing raw data and consensus results.
         """
         location = state["location"]
+        print("=" * 60)
         print(f"Agent 1: Collecting weather data for {location}")
 
         state["agent1_status"] = AgentStatus.COLLECTING
@@ -157,10 +158,7 @@ class DataCollectorAgent:
                 )
                 raw_data.append(source_data)
                 successful_sources += 1
-                print(
-                    f"{result.source.value}: "
-                    f"{result.temperature:.1f}°F, {result.conditions}"
-                )
+
             elif result and result.error:
                 error_msg = f"{result.source.value}: {result.error}"
                 state["errors"].append(error_msg)
@@ -172,8 +170,8 @@ class DataCollectorAgent:
             state["weather_consensus"] = self._calculate_consensus(raw_data)
             state["agent1_status"] = AgentStatus.COMPLETED
             print(
-                f"Agent 1 completed: "
-                f"{successful_sources}/{len(available_clients)} "
+                f"Agent 1 completed: \n"
+                f"  - {successful_sources}/{len(available_clients)} "
                 f"sources successful"
             )
         else:

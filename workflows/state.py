@@ -1,4 +1,4 @@
-# agents/state.py
+# agents/state.py (updated)
 """
 State management for the Weather Forecast MAS
 Defines the shared state that flows through all agents
@@ -14,7 +14,7 @@ class AgentStatus(str, Enum):
     PENDING = "pending"
     COLLECTING = "collecting"
     ANALYZING = "analyzing"
-    PROCESSING = "processing"
+    PROCESSING = "processing"  # For Agent 3
     COMPLETED = "completed"
     FAILED = "failed"
 
@@ -83,6 +83,7 @@ class WeatherAlert:
         """Convert to dictionary for easy serialization"""
         return asdict(self)
 
+
 @dataclass
 class WeatherReport:
     """Comprehensive weather report for Agent 3 (LLM)"""
@@ -101,6 +102,24 @@ class WeatherReport:
         """Convert to dictionary for LLM consumption"""
         return asdict(self)
 
+
+@dataclass
+class LLMResponse:
+    """LLM response from Agent 3"""
+    analysis: str
+    recommendations: List[str]
+    answers: Dict[str, str]
+    follow_up_questions: List[str]
+    requires_rerun: bool = False
+    rerun_location: Optional[str] = None
+    confidence: float = 0.0
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary"""
+        return asdict(self)
+
+
 class AgentState(TypedDict):
     """
     Main state object that flows through the LangGraph workflow
@@ -109,11 +128,12 @@ class AgentState(TypedDict):
     # User Input
     location: str
     request_id: str
+    user_question: Optional[str]  # Optional question for Agent 3
     
     # Agent Status
     agent1_status: AgentStatus
     agent2_status: AgentStatus
-    
+    agent3_status: AgentStatus
     
     # Data Storage
     raw_weather_data: List[WeatherSourceData]
@@ -123,15 +143,16 @@ class AgentState(TypedDict):
     weather_alerts: List[WeatherAlert]
     analysis_summary: Optional[str]
     detailed_insights: Optional[Dict[str, Any]]
-    weather_report: Optional[WeatherReport] 
-
+    weather_report: Optional[WeatherReport]  # For Agent 3
+    
+    # LLM Results
+    llm_response: Optional[LLMResponse]
+    llm_analysis: Optional[str]
+    
     # Metadata
     timestamp: str
     errors: List[str]
     execution_time_ms: Optional[int]
-    
-    # LLM Context (if needed)
-    llm_analysis: Optional[str]
     
     # Configuration
     config: Optional[Dict[str, Any]]
