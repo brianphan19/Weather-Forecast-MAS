@@ -187,25 +187,28 @@ async def main():
 
     config = Config.from_env()
 
-    location = input("Location: ").strip() or config.weather.default_location
-    user_question = input("Questions: ").strip() or "Should I go out today?"
+    while True:
+        location = input("Location (or 'quit'): ").strip() or config.weather.default_location
+        if location.lower() == "quit":
+            break
+        user_question = input("Questions: ").strip() or "Should I go out today?"
 
-    print(f"\nUsing location: {location}")
+        print(f"\nUsing location: {location}")
 
 
-    try:
-        orchestrator = WeatherMASOrchestrator()
-        results = await orchestrator.get_weather_forecast(
-            location, user_question
-        )
-        display_results(results)
+        try:
+            orchestrator = WeatherMASOrchestrator()
+            results = await orchestrator.get_weather_forecast(
+                location, user_question
+            )
+            display_results(results)
 
-    except KeyboardInterrupt:
-        print("\nExiting application.")
-    except Exception as exc:
-        print(f"\nUnexpected error: {exc}")
-        import traceback
-        traceback.print_exc()
+        except KeyboardInterrupt:
+            print("\nExiting application.")
+        except Exception as exc:
+            print(f"\nUnexpected error: {exc}")
+            import traceback
+            traceback.print_exc()
 
 
 if __name__ == "__main__":

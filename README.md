@@ -20,6 +20,98 @@ The system is organized around three cooperating agents coordinated via a LangGr
 ![image](workflow_graph.png)
 ---
 
+## Set up
+
+1. **Clone the repo**:
+```bash
+git clone https://github.com/brianphan19/Weather-Forecast-MAS
+cd <repo-folder>
+```
+
+2. **Create and activate a virtual environment**:
+```bash
+python -m venv venv  
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+```
+
+3. **Install dependencies**:
+
+```bash
+pip install -r requirements.txt
+```
+
+
+4. **Create a `.env` file** in the root folder:
+
+```dotenv
+# Content directory
+CONTENT_DIR=./data
+
+# OpenAI API Configuration
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-3.5-turbo
+
+
+# Groq API Configuration (alternative to OpenAI)
+GROQ_API_KEY=
+GROQ_MODEL=llama-3.1-8b-instant
+
+# Google Gemini API Configuration (alternative to OpenAI/Groq)
+GOOGLE_API_KEY=
+GOOGLE_MODEL=gemini-pro
+
+# Embedding Configuration
+# Optional: HuggingFace model for embeddings (default: sentence-transformers/all-MiniLM-L6-v2)
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+
+# Vector Database Configuration
+# Optional: ChromaDB collection name (default: rag_documents)
+CHROMA_COLLECTION_NAME=rag_documents
+```
+## Usage
+
+1. **Configure API Key**:
+```ini
+OPENWEATHER_API_KEY=your_key
+WEATHERAPI_KEY=your_key
+VISUALCROSSING_API_KEY=your_key
+OPENAI_API_KEY=your_key
+```
+
+2. **Run the multi-agent system**:
+```python
+import asyncio
+from main import run_forecast   # adjust import if needed
+
+async def main():
+    while True:
+        location = input("Location (or 'quit'): ").strip() or config.weather.default_location
+        if location.lower() == "quit":
+            break
+        user_question = input("Questions: ").strip() or "Should I go out today?"
+
+        print(f"\nUsing location: {location}")
+
+
+
+        orchestrator = WeatherMASOrchestrator()
+        results = await orchestrator.get_weather_forecast(
+            location, user_question
+        )
+        display_results(results)
+```
+
+3. **Example interaction**:
+```yaml
+Location (or 'quit'): Ha Noi 
+Questions: Will it rain tomorrow?
+
+...
+
+Answers:
+  - Will it rain tomorrow?: There is a slight chance of scattered showers, but it's not expected to be a heavy downpour.
+```
+
 ## Agent Responsibilities
 
 ### Agent 1 – Data Acquisition
