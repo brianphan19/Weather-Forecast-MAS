@@ -39,7 +39,7 @@ class LLMAgent:
         Analyze weather report using LLM and update the state.
         
         """
-        print(f"Agent 3: Collecting weather data for {state["location"]}")
+        print(f"Agent 3: Collecting weather data for {state['location']}")
 
         try:
             state["agent3_status"] = AgentStatus.PROCESSING
