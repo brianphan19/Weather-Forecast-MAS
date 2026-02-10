@@ -17,6 +17,8 @@ from workflows.state import AgentState, AgentStatus
 from agents.weather_data_report_agent import ReportAgent
 from agents.response_agent import LLMAgent
 from agents.data_acquisition_agent import DataCollectorAgent
+from agents.query_enhancer_agent import QueryEnhancerAgent
+
 from config.settings import Config
 
 
@@ -29,7 +31,8 @@ class WeatherForecastWorkflow:
         self.config = config
         self.agent1 = DataCollectorAgent(config)
         self.agent2 = ReportAgent(config)
-        self.agent3 = LLMAgent(config)
+        self.agent3 = QueryEnhancerAgent(config)
+        self.agent4 = LLMAgent(config)
         self.graph: Optional[StateGraph] = None
         self.max_reruns = 3
 
@@ -40,27 +43,29 @@ class WeatherForecastWorkflow:
         workflow = StateGraph(state_schema=AgentState)
 
         # Add agent nodes
-        workflow.add_node("agent1_data_collector", self.create_agent1_node())
-        workflow.add_node("agent2_analyzer", self.create_agent2_node())
-        workflow.add_node("agent3_llm", self.create_agent3_node())
+        workflow.add_node("data_collector_agent", self.create_data_agent())
+        workflow.add_node("analyze_agent", self.create_analyzer_agent())
+        workflow.add_node("query_enhancer_agent", self.create_query_enhancer_agent())
+        workflow.add_node("llm_report_agent", self.create_report_agent())
 
         # Define entry point
-        workflow.set_entry_point("agent1_data_collector")
+        workflow.set_entry_point("data_collector_agent")
 
         # Conditional routing
         workflow.add_conditional_edges(
-            "agent1_data_collector",
+            "data_collector_agent",
             self.route_after_agent1,
-            {"to_agent2": "agent2_analyzer", "end": END, "error": END},
+            {"to_agent2": "analyze_agent", "end": END, "error": END},
         )
-        workflow.add_edge("agent2_analyzer", "agent3_llm")
-
+        workflow.add_edge("analyze_agent", "query_enhancer_agent")
         
-        workflow.add_edge("agent3_llm", END)
+        workflow.add_edge("query_enhancer_agent", "llm_report_agent")   
+        
+        workflow.add_edge("llm_report_agent", END)
         self.graph = workflow.compile()
         return self.graph
 
-    def create_agent1_node(self) -> Callable:
+    def create_data_agent(self) -> Callable:
         """Agent 1 node for collecting weather data."""
 
         async def agent1_node(state: AgentState) -> AgentState:
@@ -75,7 +80,7 @@ class WeatherForecastWorkflow:
 
         return agent1_node
 
-    def create_agent2_node(self) -> Callable:
+    def create_analyzer_agent(self) -> Callable:
         """Agent 2 node for analysis."""
 
         async def agent2_node(state: AgentState) -> AgentState:
@@ -86,20 +91,30 @@ class WeatherForecastWorkflow:
                 state["errors"].append(f"Agent 2 node failed: {str(e)}")
                 return state
 
-        return agent2_node
+        return agent2_node    
 
-    def create_agent3_node(self) -> Callable:
-        """Agent 3 node for LLM analysis."""
-
-        async def agent3_node(state: AgentState) -> AgentState:
+    def create_query_enhancer_agent(self) -> Callable:
+        async def enhancer_node(state: AgentState) -> AgentState:
             try:
-                return await self.agent3.analyze_with_llm(state)
+                return await self.agent3.enhance_query(state)
             except Exception as e:
                 state["agent3_status"] = AgentStatus.FAILED
                 state["errors"].append(f"Agent 3 node failed: {str(e)}")
                 return state
+        return enhancer_node
 
-        return agent3_node
+    def create_report_agent(self) -> Callable:
+        """Agent 4 node for LLM analysis."""
+
+        async def agent4_node(state: AgentState) -> AgentState:
+            try:
+                return await self.agent4.analyze_with_llm(state)
+            except Exception as e:
+                state["agent4_status"] = AgentStatus.FAILED
+                state["errors"].append(f"Agent 4 node failed: {str(e)}")
+                return state
+
+        return agent4_node
 
     def route_after_agent1(self, state: AgentState) -> str:
         """
@@ -111,4 +126,4 @@ class WeatherForecastWorkflow:
         if not state.get("raw_weather_data"):
             return "end"
         return "to_agent2"
-
+    

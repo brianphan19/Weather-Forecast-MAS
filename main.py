@@ -12,6 +12,7 @@ from typing import Dict
 
 from workflows.orchestrator import WeatherMASOrchestrator
 from config.settings import Config
+from workflows.state import AgentState
 
 
 def display_results(results: Dict):
@@ -44,7 +45,9 @@ def display_results(results: Dict):
         print("\nAgent Statuses:")
         print(f"  - Agent 1 (Data): {workflow_status.get('agent1', 'unknown')}")
         print(f"  - Agent 2 (Analysis): {workflow_status.get('agent2', 'unknown')}")
-        print(f"  - Agent 3 (LLM): {workflow_status.get('agent3', 'unknown')}")
+        print(f"  - Agent 3 (Enhancer): {workflow_status.get('agent3', 'unknown')}")
+        print(f"  - Agent 4 (LLM): {workflow_status.get('agent4', 'unknown')}")
+
 
         data_sources = results.get("data_sources", {})
         print(
@@ -174,6 +177,7 @@ def display_results(results: Dict):
     print("\n" + "=" * 60)
 
 
+    
 async def main():
     """
     Interactive application entry point.
@@ -188,9 +192,9 @@ async def main():
     config = Config.from_env()
 
     while True:
-        location = input("Location (or 'quit'): ").strip() or config.weather.default_location
+        location = input("Location: ").strip() or config.weather.default_location
         
-        user_question = input("Questions: ").strip() or "Should I go out today?"
+        user_question = input("Questions: ").strip() or "weather?"
 
         print(f"\nUsing location: {location}")
 
@@ -200,6 +204,7 @@ async def main():
             results = await orchestrator.get_weather_forecast(
                 location, user_question
             )
+            
             display_results(results)
 
         except KeyboardInterrupt:
@@ -210,7 +215,7 @@ async def main():
             traceback.print_exc()
 
         more = input("Quit? (Y/n)").strip()
-        if more.lower() == "Y":
+        if more.lower() == "y" or None:
             break
 
 if __name__ == "__main__":

@@ -98,6 +98,7 @@ class WeatherMASOrchestrator:
             "agent1_status": AgentStatus.PENDING,
             "agent2_status": AgentStatus.PENDING,
             "agent3_status": AgentStatus.PENDING,
+            "agent4_status": AgentStatus.PENDING,
             "raw_weather_data": [],
             "weather_consensus": None,
             "weather_alerts": [],
@@ -154,6 +155,7 @@ class WeatherMASOrchestrator:
                 "agent1": state.get("agent1_status"),
                 "agent2": state.get("agent2_status"),
                 "agent3": state.get("agent3_status"),
+                "agent4": state.get("agent4_status"),
                 "execution_time_ms": state.get("execution_time_ms"),
                 "reruns": state.get("_rerun_count", 0),
             },
@@ -206,6 +208,7 @@ class WeatherMASOrchestrator:
                 "agent1": state.get("agent1_status"),
                 "agent2": state.get("agent2_status"),
                 "agent3": state.get("agent3_status"),
+                "agent4": state.get("agent4_status"),
                 "reruns": state.get("_rerun_count", 0),
             },
         }

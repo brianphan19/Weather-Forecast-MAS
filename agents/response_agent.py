@@ -1,6 +1,6 @@
-# agents/agent3_llm.py
+# agents/agent4_llm.py
 """
-Agent 3: LLM Analysis Agent
+Agent 4: LLM Analysis Agent
 Uses multi-provider LLM system to analyze weather reports and answer questions.
 """
 from typing import Dict, List, Optional, Any
@@ -15,7 +15,7 @@ from utils.llm_client.multi_provider import MultiProviderLLM
 
 class LLMAgent:
     """
-    Agent 3: LLM-based analysis and question answering.
+    Agent 4: LLM-based analysis and question answering.
     Processes weather reports and provides insights and recommendations.
     """
 
@@ -39,13 +39,13 @@ class LLMAgent:
         Analyze weather report using LLM and update the state.
         
         """
-        print(f"Agent 3: Collecting weather data for {state['location']}")
+        print(f"Agent 4: Collecting weather data for {state['location']}")
 
         try:
-            state["agent3_status"] = AgentStatus.PROCESSING
+            state["agent4_status"] = AgentStatus.PROCESSING
 
             if not state.get("weather_report"):
-                state["agent3_status"] = AgentStatus.FAILED
+                state["agent4_status"] = AgentStatus.FAILED
                 state["errors"].append("No weather report available for LLM analysis")
                 return state
 
@@ -53,18 +53,22 @@ class LLMAgent:
             user_question = state.get("user_question", "Provide a comprehensive weather analysis and recommendations")
             location = state["location"]
 
-            llm_response = await self._generate_llm_response(report, user_question, location)
+            llm_response = await self._generate_llm_response(
+                report, 
+                user_question, 
+                location
+            )
 
             state["llm_response"] = llm_response
             state["llm_analysis"] = llm_response.analysis
-            state["agent3_status"] = AgentStatus.COMPLETED
+            state["agent4_status"] = AgentStatus.COMPLETED
 
-            print(f"Agent 3: Analysis complete using {self.llm_client.current_provider}")
+            print(f"  - Analysis complete using {self.llm_client.current_provider}")
             return state
 
         except Exception as e:
-            state["agent3_status"] = AgentStatus.FAILED
-            state["errors"].append(f"Agent 3 LLM analysis failed: {str(e)}")
+            state["agent4_status"] = AgentStatus.FAILED
+            state["errors"].append(f"Agent 4 LLM analysis failed: {str(e)}")
             return state
 
     async def _generate_llm_response(self, report: WeatherReport, user_question: str, location: str) -> LLMResponse:
@@ -171,7 +175,7 @@ Respond in the JSON format specified by the system prompt."""
 
     def _generate_fallback_response(self, report: WeatherReport, user_question: str) -> LLMResponse:
         """Generate fallback response when LLM is unavailable."""
-        analysis = f"Weather Analysis for {report.location}:\n{report.executive_summary}"
+        analysis = f"Fallback Weather Analysis for {report.location}:\n{report.executive_summary}"
         recommendations = report.recommendations[:5] if report.recommendations else []
         answers = {}
         if "cold" in user_question.lower():

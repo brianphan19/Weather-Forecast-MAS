@@ -128,12 +128,13 @@ class AgentState(TypedDict):
     # User Input
     location: str
     request_id: str
-    user_question: Optional[str]  # Optional question for Agent 3
+    user_question: Optional[str] 
     
     # Agent Status
     agent1_status: AgentStatus
     agent2_status: AgentStatus
     agent3_status: AgentStatus
+    agent4_status: AgentStatus
     
     # Data Storage
     raw_weather_data: List[WeatherSourceData]
