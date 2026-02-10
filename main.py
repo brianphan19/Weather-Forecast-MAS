@@ -189,8 +189,7 @@ async def main():
 
     while True:
         location = input("Location (or 'quit'): ").strip() or config.weather.default_location
-        if location.lower() == "quit":
-            break
+        
         user_question = input("Questions: ").strip() or "Should I go out today?"
 
         print(f"\nUsing location: {location}")
@@ -210,6 +209,9 @@ async def main():
             import traceback
             traceback.print_exc()
 
+        more = input("Quit? (Y/n)").strip()
+        if more.lower() == "n":
+            break
 
 if __name__ == "__main__":
     asyncio.run(main())
