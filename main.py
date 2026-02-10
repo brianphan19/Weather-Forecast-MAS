@@ -210,7 +210,7 @@ async def main():
             traceback.print_exc()
 
         more = input("Quit? (Y/n)").strip()
-        if more.lower() == "n":
+        if more.lower() == "Y":
             break
 
 if __name__ == "__main__":
