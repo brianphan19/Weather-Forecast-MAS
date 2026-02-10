@@ -14,9 +14,9 @@ from typing import Callable, Optional
 from datetime import datetime
 
 from workflows.state import AgentState, AgentStatus
-from agents.weather_data_report import ReportAgent
-from agents.llm_chat import LLMAgent
-from agents.data_acquisition import DataCollectorAgent
+from agents.weather_data_report_agent import ReportAgent
+from agents.response_agent import LLMAgent
+from agents.data_acquisition_agent import DataCollectorAgent
 from config.settings import Config
 
 
