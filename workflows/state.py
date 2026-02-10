@@ -3,7 +3,7 @@
 State management for the Weather Forecast MAS
 Defines the shared state that flows through all agents
 """
-from typing import Dict, List, Optional, Any, TypedDict, Union
+from typing import Dict, List, Optional, Any, TypedDict
 from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from enum import Enum

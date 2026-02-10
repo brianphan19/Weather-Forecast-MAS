@@ -14,7 +14,6 @@ import statistics
 from datetime import datetime
 from typing import List, Optional
 
-from langgraph.graph import END, StateGraph
 
 from config.settings import Config
 from utils.weather_client import (

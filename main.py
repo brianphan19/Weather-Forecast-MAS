@@ -12,7 +12,6 @@ from typing import Dict
 
 from workflows.orchestrator import WeatherMASOrchestrator
 from config.settings import Config
-from workflows.state import AgentState
 
 
 def display_results(results: Dict):

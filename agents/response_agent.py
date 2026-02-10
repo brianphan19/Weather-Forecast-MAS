@@ -3,10 +3,8 @@
 Agent 4: LLM Analysis Agent
 Uses multi-provider LLM system to analyze weather reports and answer questions.
 """
-from typing import Dict, List, Optional, Any
 import asyncio
 import json
-from datetime import datetime
 
 from workflows.state import AgentState, AgentStatus, LLMResponse, WeatherReport
 from config.settings import Config
@@ -64,12 +62,11 @@ class LLMAgent:
             state["agent4_status"] = AgentStatus.COMPLETED
 
             print(f"  - Analysis complete using {self.llm_client.current_provider}")
-            return state
 
         except Exception as e:
             state["agent4_status"] = AgentStatus.FAILED
             state["errors"].append(f"Agent 4 LLM analysis failed: {str(e)}")
-            return state
+        return state
 
     async def _generate_llm_response(self, report: WeatherReport, user_question: str, location: str) -> LLMResponse:
         """
