@@ -129,12 +129,12 @@ def display_results(results: Dict):
 
             answers = llm_response.get("answers")
             if answers:
-                print("\nAnswers:")
+                print("\nUser question:")
                 for question, answer in answers.items():
                     display_answer = (
                         answer if len(answer) < 150 else answer[:150] + "..."
                     )
-                    print(f"  - {question}: {display_answer}")
+                    print(f"  - Question: {question}\n  - Answer:{ display_answer}")
 
             follow_ups = llm_response.get("follow_up_questions")
             if follow_ups:
