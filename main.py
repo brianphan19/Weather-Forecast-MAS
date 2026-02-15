@@ -131,9 +131,7 @@ def display_results(results: Dict):
             if answers:
                 print("\nUser question:")
                 for question, answer in answers.items():
-                    display_answer = (
-                        answer if len(answer) < 150 else answer[:150] + "..."
-                    )
+                    display_answer = answer
                     print(f"  - Question: {question}\n  - Answer:{ display_answer}")
 
             follow_ups = llm_response.get("follow_up_questions")
@@ -213,8 +211,8 @@ async def main():
             import traceback
             traceback.print_exc()
 
-        more = input("Quit? (Y/n)").strip()
-        if more.lower() == "y" or None:
+        rerun_forecast = input("Quit? (Y/n): ").strip()
+        if rerun_forecast.lower() == "y" or None:
             break
 
 if __name__ == "__main__":

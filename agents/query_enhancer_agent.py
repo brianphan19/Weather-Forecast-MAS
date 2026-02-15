@@ -19,7 +19,7 @@ class QueryEnhancerAgent:
             print(f"Failed to initialize LLM client: {e}")
             self.llm_client = None
 
-    async def _generate_llm_response(self,user_question: str, location: str) -> str:
+    async def _generate_llm_query_enhancer(self,user_question: str, location: str) -> str:
         """
         Generate LLM response based on weather report and user question.
         """
@@ -81,11 +81,18 @@ Rewrite this query for better weather analysis.
 
         try:
             state["agent3_status"] = AgentStatus.PROCESSING
+            
+            
+            if not self._needs_enhancement(user_question=state["user_question"]):
+                state["agent3_status"] = AgentStatus.COMPLETED
+                return state
 
-            enhanced_query = await self._generate_llm_response(
+            enhanced_query = await self._generate_llm_query_enhancer(
                 user_question=state["user_question"],
                 location=state["location"],
             )
+            
+
 
             state["user_question"] = enhanced_query
             print("  - Enhanced Query:", enhanced_query)
@@ -97,3 +104,28 @@ Rewrite this query for better weather analysis.
         return state
 
 
+    def _needs_enhancement(self, user_question: str) -> bool:
+        if not user_question:
+            return True
+
+        q = user_question.strip().lower()
+
+        vague_queries = {
+            "weather",
+            "weather?",
+            "forecast",
+            "temp",
+            "temperature",
+            "rain?",
+            "today weather",
+        }
+
+        # too short
+        if len(q.split()) <= 3:
+            return True
+
+        # generic queries
+        if q in vague_queries:
+            return True
+
+        return False
