@@ -15,7 +15,7 @@ A production-style **3-agent weather forecasting system** built using **LangGrap
 
 ## High-Level Architecture
 
-The system is organized around three cooperating agents coordinated via a LangGraph state machine.
+The system is organized around 4 cooperating agents coordinated via a LangGraph state machine.
 
 ![image](workflow_graph.png)
 ---
@@ -85,20 +85,21 @@ from main import run_forecast   # adjust import if needed
 
 async def main():
     while True:
-        location = input("Location (or 'quit'): ").strip() or config.weather.default_location
-        if location.lower() == "quit":
-            break
-        user_question = input("Questions: ").strip() or "Should I go out today?"
+        location = input("Location: ").strip() or config.weather.default_location
+        
+        user_question = input("Questions: ").strip() or "weather?"
 
         print(f"\nUsing location: {location}")
-
-
 
         orchestrator = WeatherMASOrchestrator()
         results = await orchestrator.get_weather_forecast(
             location, user_question
         )
         display_results(results)
+
+        rerun_forecast = input("Quit? (Y/n): ").strip()
+        if rerun_forecast.lower() == "y" or None:
+            break
 ```
 
 3. **Example interaction**:
@@ -114,31 +115,35 @@ Answers:
 
 ## Agent Responsibilities
 
-### Agent 1 – Data Acquisition
+### Agent 1 – Data Acquisition Agent
 
-**Purpose**
-- Collect raw weather data from multiple providers
-- Normalize responses into a common schema
+**Purpose**  
+Collect reliable weather data from multiple external providers and prepare it for downstream analysis.
 
 **Responsibilities**
-- Query multiple APIs (OpenWeather, WeatherAPI, Visual Crossing)
-- Handle API failures independently
-- Attach source metadata and errors
-- Output structured `WeatherData` objects
+- Initialize all available weather API clients from configuration
+- Fetch weather data concurrently from multiple sources
+- Normalize heterogeneous API responses into a unified internal schema
+- Handle provider failures and timeouts without stopping execution
+- Track source-level errors and availability
+- Compute a consensus summary across providers
+- Update shared workflow state for downstream agents
 
 **Outputs**
-- `raw_weather_data[]`
-- Source-level confidence indicators
+- `raw_weather_data[]` – normalized weather data from each source
+- `weather_consensus` – aggregated statistics across providers
+- Source success/failure metadata
+- Updated Agent 1 execution status
 
 ---
 
 ### Agent 2 – Weather Data Report
 
 **Purpose**
-- Convert raw data into actionable insights
+Transform raw multi-source weather data into a comprehensive, structured report that downstream agents and LLM components can easily interpret.
 
 **Responsibilities**
-- Aggregate values across sources
+- Validate and consume normalized weather data from Agent 1
 - Compute:
   - temperature ranges and averages
   - humidity and wind statistics
@@ -147,27 +152,80 @@ Answers:
 - Generate alerts with severity levels
 
 **Outputs**
-- `weather_report`
-- `analysis_summary`
-- `detailed_insights`
-- `weather_alerts[]`
+- `weather_report` – comprehensive structured report
+- `analysis_summary` – executive summary for downstream use
+- `detailed_insights` – computed analytical metrics
+- `weather_alerts[]` – generated alerts and risk warnings
+- Updated Agent 2 execution status
+  
+---
+
+### Agent 3 – Query Enhancer Agent
+
+**Purpose**  
+Improve user weather queries before LLM analysis so downstream agents receive clearer, more informative questions without changing the original intent.
+
+**Responsibilities**
+- Evaluate whether a user query needs improvement
+- Detect vague, short, or generic weather questions
+- Rewrite queries using an LLM for clarity and specificity
+- Preserve original user intent while adding useful context
+- Fall back safely to the original query if enhancement fails
+- Update workflow state with the enhanced query
+
+**Enhancement Logic**
+- Queries are enhanced when they are:
+  - Very short
+  - Generic (e.g., "weather?", "forecast", "temperature")
+- Queries that are already descriptive are passed through unchanged
+
+**LLM Usage**
+- Uses a multi-provider LLM client
+- Applies retry logic for reliability
+- Returns only the rewritten query
+- Falls back to original query if providers are unavailable
+
+**Outputs**
+- Updated `user_question` in workflow state
+- Agent execution status updates
+- Optional enhanced query logging
+- Updated Agent 3 execution status
 
 ---
 
-### Agent 3 – LLM Analysis & Q&A
+### Agent 4 – LLM Analysis Agent
 
-**Purpose**
-- Interpret analysis results for humans
+**Purpose**  
+Transform structured weather analysis into human-friendly insights, recommendations, and direct answers to user questions using a Large Language Model.
 
 **Responsibilities**
-- Generate natural-language summaries
-- Answer user questions
-- Provide recommendations
-- Assess confidence and data quality
+- Consume structured weather reports produced by previous agents
+- Generate natural-language analysis and summaries
+- Answer user weather-related questions
+- Produce actionable recommendations
+- Provide follow-up questions and confidence scores
+- Safely fall back to rule-based summaries if LLM access fails
+- Update workflow state with structured LLM outputs
+
+**LLM Processing Flow**
+- Formats structured weather reports into LLM-friendly prompts
+- Sends prompts using a multi-provider LLM client
+- Applies retry logic for reliability
+- Requires responses in structured JSON format
+- Parses and validates LLM outputs before storing results
+
+**Fallback Behavior**
+- Automatically generates simplified analysis if:
+  - No LLM provider is available
+  - API calls fail
+  - Output parsing fails
+- Ensures workflow continuity even without LLM services
 
 **Outputs**
 - `llm_response`
-
+- `llm_analysis`
+- User-facing analysis, recommendations, and answers
+- Updated Agent 4 execution status
 
 ---
 
@@ -177,7 +235,7 @@ All agents operate on a shared immutable `AgentState`.
 
 **Key fields**
 - `location`, `request_id`, `user_question`
-- `agent1_status`, `agent2_status`, `agent3_status`
+- `agent1_status`, `agent2_status`, `agent3_status`, `agent4_status`
 - `raw_weather_data[]`
 - `weather_consensus`
 - `weather_alerts[]`
@@ -201,8 +259,9 @@ This ensures:
 3. Initial `AgentState` is created  
 4. Agent 1 fetches and normalizes data  
 5. Agent 2 combine and builds data report  
-6. Agent 3 reasons, answers, and evaluates confidence  
-7. Final response formatted and returned  
+6. Agent 3 improve query
+7. Agent 4 reasons, answers, and evaluates confidence  
+8. Final response formatted and returned  
 
 ---
 
